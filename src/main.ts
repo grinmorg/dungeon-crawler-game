@@ -3,8 +3,6 @@ import Phaser from 'phaser';
 import Game from "./scenes/Game";
 import Preloader from "./scenes/Preloader";
 
-console.log(import.meta.env);
-
 
 export default new Phaser.Game({
 	type: Phaser.AUTO,

@@ -1,5 +1,4 @@
 import Phaser from "phaser";
-import debugDraw from "../utils/debug";
 
 export default class Game extends Phaser.Scene {
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
@@ -8,7 +7,7 @@ export default class Game extends Phaser.Scene {
   constructor() {
     super("game");
   }
-  
+
   preload() {
     this.cursors = this.input.keyboard.createCursorKeys();
   }
@@ -28,8 +27,6 @@ export default class Game extends Phaser.Scene {
 
     // Добавляю стенам свойство
     wallsLayer.setCollisionByProperty({ collides: true });
-
-    // debugDraw(this, wallsLayer);
 
     // персонаж
     this.fauna = this.physics.add.sprite(128, 128, "fauna", "walk-down-3.png");
@@ -110,7 +107,7 @@ export default class Game extends Phaser.Scene {
     // this.fauna.anims.play('fauna-run-side');
   }
 
-  update(time: number, delta: number): void {
+  update(): void {
     if (!this.cursors || !this.fauna) {
       return;
     }
