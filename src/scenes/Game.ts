@@ -3,6 +3,10 @@ import Phaser from "phaser";
 export default class Game extends Phaser.Scene {
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   private fauna!: Phaser.Physics.Arcade.Sprite;
+  private keyA!: Phaser.Input.Keyboard.Key;
+  private keyS!: Phaser.Input.Keyboard.Key;
+  private keyD!: Phaser.Input.Keyboard.Key;
+  private keyW!: Phaser.Input.Keyboard.Key;
 
   constructor() {
     super("game");
@@ -10,6 +14,10 @@ export default class Game extends Phaser.Scene {
 
   preload() {
     this.cursors = this.input.keyboard.createCursorKeys();
+    this.keyA = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
+    this.keyS = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
+    this.keyD = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);
+    this.keyW = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W);
   }
 
   create() {
@@ -19,7 +27,7 @@ export default class Game extends Phaser.Scene {
     const map = this.make.tilemap({ key: "dungeon" });
 
     // сопоставление тайлов с загруженным png (название тайлов берётся из редактора)
-    const tileset = map.addTilesetImage("dungeon", "tiles", 16, 16);
+    const tileset = map.addTilesetImage("dungeon", "tiles", 16, 16, 1, 2);
 
     map.createLayer("Ground", tileset);
 
@@ -117,7 +125,10 @@ export default class Game extends Phaser.Scene {
     const speedSide = 80;
 
     //right && up
-    if (this.cursors.right?.isDown && this.cursors.up?.isDown) {
+    if (
+      (this.cursors.right?.isDown && this.cursors.up?.isDown) ||
+      (this.keyD.isDown && this.keyW.isDown)
+    ) {
       this.fauna.anims.play("fauna-run-side", true);
       this.fauna.setVelocity(speedSide, -speedSide);
       this.fauna.scaleX = 1;
@@ -126,7 +137,10 @@ export default class Game extends Phaser.Scene {
       this.fauna.body.offset.x = 8;
     }
     //right && down
-    else if (this.cursors.right?.isDown && this.cursors.down?.isDown) {
+    else if (
+      (this.cursors.right?.isDown && this.cursors.down?.isDown) ||
+      (this.keyD.isDown && this.keyS.isDown)
+    ) {
       this.fauna.anims.play("fauna-run-side", true);
       this.fauna.setVelocity(speedSide, speedSide);
       this.fauna.scaleX = 1;
@@ -135,7 +149,10 @@ export default class Game extends Phaser.Scene {
       this.fauna.body.offset.x = 8;
     }
     //left && up
-    else if (this.cursors.left?.isDown && this.cursors.up?.isDown) {
+    else if (
+      (this.cursors.left?.isDown && this.cursors.up?.isDown) ||
+      (this.keyA.isDown && this.keyW.isDown)
+    ) {
       this.fauna.anims.play("fauna-run-side", true);
       this.fauna.setVelocity(-speedSide, -speedSide);
       this.fauna.scaleX = -1;
@@ -144,7 +161,10 @@ export default class Game extends Phaser.Scene {
       this.fauna.body.offset.x = 24;
     }
     //left && down
-    else if (this.cursors.left?.isDown && this.cursors.down?.isDown) {
+    else if (
+      (this.cursors.left?.isDown && this.cursors.down?.isDown) ||
+      (this.keyA.isDown && this.keyS.isDown)
+    ) {
       this.fauna.anims.play("fauna-run-side", true);
       this.fauna.setVelocity(-speedSide, speedSide);
       this.fauna.scaleX = -1;
@@ -153,7 +173,7 @@ export default class Game extends Phaser.Scene {
       this.fauna.body.offset.x = 24;
     }
     // left
-    else if (this.cursors.left?.isDown) {
+    else if (this.cursors.left?.isDown || this.keyA.isDown) {
       this.fauna.anims.play("fauna-run-side", true);
       this.fauna.setVelocity(-speed, 0);
       this.fauna.scaleX = -1;
@@ -162,7 +182,7 @@ export default class Game extends Phaser.Scene {
       this.fauna.body.offset.x = 24;
     }
     //right
-    else if (this.cursors.right?.isDown) {
+    else if (this.cursors.right?.isDown || this.keyD.isDown) {
       this.fauna.anims.play("fauna-run-side", true);
       this.fauna.setVelocity(speed, 0);
       this.fauna.scaleX = 1;
@@ -171,7 +191,7 @@ export default class Game extends Phaser.Scene {
       this.fauna.body.offset.x = 8;
     }
     // up
-    else if (this.cursors.up?.isDown) {
+    else if (this.cursors.up?.isDown || this.keyW.isDown) {
       this.fauna.anims.play("fauna-run-up", true);
       this.fauna.setVelocity(0, -speed);
       this.fauna.scaleX = 1;
@@ -180,7 +200,7 @@ export default class Game extends Phaser.Scene {
       this.fauna.body.offset.x = 8;
     }
     // down
-    else if (this.cursors.down?.isDown) {
+    else if (this.cursors.down?.isDown || this.keyS.isDown) {
       this.fauna.anims.play("fauna-run-down", true);
       this.fauna.setVelocity(0, speed);
       this.fauna.scaleX = 1;
