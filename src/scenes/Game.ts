@@ -32,7 +32,8 @@ export default class Game extends Phaser.Scene {
     this.fauna = this.physics.add.sprite(128, 128, "fauna", "walk-down-3.png");
 
     // делаю чуть меньше хитбокс
-    this.fauna.body.setSize(this.fauna.width * 0.5, this.fauna.height * 0.8);
+    this.fauna.body.setSize(this.fauna.width * 0.5, this.fauna.height * 0.6);
+    this.fauna.body.offset.y = 14;
 
     // ставлю в изначальную позицию
     this.fauna.setPosition(48, 48);
