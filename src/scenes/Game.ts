@@ -1,4 +1,7 @@
 import Phaser from "phaser";
+import { createSkelAnims } from "../anims/EnemyAnims";
+import { createCharacterAnims } from "../anims/CharacterAnims";
+import Skel from "../enemies/Skel";
 
 export default class Game extends Phaser.Scene {
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
@@ -21,6 +24,9 @@ export default class Game extends Phaser.Scene {
   }
 
   create() {
+    createCharacterAnims(this.anims);
+    createSkelAnims(this.anims);
+
     // this.add.image(0,0,'tiles');
 
     // создаю сцену из tilemap json
@@ -46,67 +52,6 @@ export default class Game extends Phaser.Scene {
     // ставлю в изначальную позицию
     this.fauna.setPosition(48, 48);
 
-    this.anims.create({
-      key: "fauna-idle-down",
-      frames: [{ key: "fauna", frame: "walk-down-3.png" }],
-    });
-
-    this.anims.create({
-      key: "fauna-idle-up",
-      frames: [{ key: "fauna", frame: "walk-up-3.png" }],
-    });
-
-    this.anims.create({
-      key: "fauna-idle-side",
-      frames: [{ key: "fauna", frame: "walk-side-3.png" }],
-    });
-
-    this.anims.create({
-      key: "fauna-run-down",
-      frames: this.anims.generateFrameNames("fauna", {
-        start: 1,
-        end: 8,
-        prefix: "run-down-",
-        suffix: ".png",
-      }),
-      repeat: -1,
-      frameRate: 15,
-    });
-
-    this.anims.create({
-      key: "fauna-run-up",
-      frames: this.anims.generateFrameNames("fauna", {
-        start: 1,
-        end: 8,
-        prefix: "run-up-",
-        suffix: ".png",
-      }),
-      repeat: -1,
-      frameRate: 15,
-    });
-
-    this.anims.create({
-      key: "fauna-run-side",
-      frames: this.anims.generateFrameNames("fauna", {
-        start: 1,
-        end: 8,
-        prefix: "run-side-",
-        suffix: ".png",
-      }),
-      repeat: -1,
-      frameRate: 15,
-    });
-
-    this.anims.create({
-      key: "fauna-faint",
-      frames: this.anims.generateFrameNames("fauna", {
-        start: 1,
-        end: 4,
-        prefix: "faint-",
-        suffix: ".png",
-      }),
-      frameRate: 15,
-    });
 
     // столкновение (со стенами)
     this.physics.add.collider(this.fauna, wallsLayer);
@@ -114,6 +59,24 @@ export default class Game extends Phaser.Scene {
     // camera
     this.cameras.main.startFollow(this.fauna, true);
     // this.fauna.anims.play('fauna-run-side');
+
+    // моб скелет
+    const skels = this.physics.add.group({
+      classType: Skel
+    });
+
+    // столкновение (со стенами)
+    this.physics.add.collider(skels, wallsLayer);
+
+    skels.get(168, 96, "skel");
+    skels.get(106, 40, "skel");
+    skels.get(100, 126, "skel");
+
+    // 168,
+    //   96,
+    //   "skel",
+    //   "skelet_idle_anim_f0.png"
+
   }
 
   update(): void {
