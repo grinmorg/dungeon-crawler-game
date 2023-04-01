@@ -52,31 +52,22 @@ export default class Game extends Phaser.Scene {
     // ставлю в изначальную позицию
     this.fauna.setPosition(48, 48);
 
-
-    // столкновение (со стенами)
-    this.physics.add.collider(this.fauna, wallsLayer);
-
     // camera
     this.cameras.main.startFollow(this.fauna, true);
     // this.fauna.anims.play('fauna-run-side');
 
     // моб скелет
     const skels = this.physics.add.group({
-      classType: Skel
+      classType: Skel,
     });
-
-    // столкновение (со стенами)
-    this.physics.add.collider(skels, wallsLayer);
 
     skels.get(168, 96, "skel");
     skels.get(106, 40, "skel");
     skels.get(100, 126, "skel");
 
-    // 168,
-    //   96,
-    //   "skel",
-    //   "skelet_idle_anim_f0.png"
-
+    // столкновение (со стенами)
+    this.physics.add.collider(this.fauna, wallsLayer);
+    this.physics.add.collider(skels, wallsLayer);
   }
 
   update(): void {

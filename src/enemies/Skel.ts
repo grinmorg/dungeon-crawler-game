@@ -56,7 +56,7 @@ export default class Skel extends Phaser.Physics.Arcade.Sprite {
 
   private handleTileCollision(
     go: Phaser.GameObjects.GameObject,
-    tile: Phaser.Tilemaps.Tile
+    // tile: Phaser.Tilemaps.Tile
   ) {
     if (go !== this) {
       return;
