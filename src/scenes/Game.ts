@@ -2,6 +2,7 @@ import Phaser from "phaser";
 import { createSkelAnims } from "../anims/EnemyAnims";
 import { createCharacterAnims } from "../anims/CharacterAnims";
 import Skel from "../enemies/Skel";
+// import debugDraw from "../utils/debug";
 
 export default class Game extends Phaser.Scene {
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
@@ -38,15 +39,19 @@ export default class Game extends Phaser.Scene {
     map.createLayer("Ground", tileset);
 
     const wallsLayer = map.createLayer("Walls", tileset);
+    const itemsLayer = map.createLayer("Items", tileset);
 
     // Добавляю стенам свойство
     wallsLayer.setCollisionByProperty({ collides: true });
+    itemsLayer.setCollisionByProperty({ collides: true });
+
+    // debugDraw(this, wallsLayer);
 
     // персонаж
     this.fauna = this.physics.add.sprite(128, 128, "fauna", "walk-down-3.png");
 
     // делаю чуть меньше хитбокс
-    this.fauna.body.setSize(this.fauna.width * 0.5, this.fauna.height * 0.6);
+    this.fauna.body.setSize(this.fauna.width * 0.5, this.fauna.height * 0.50);
     this.fauna.body.offset.y = 14;
 
     // ставлю в изначальную позицию
