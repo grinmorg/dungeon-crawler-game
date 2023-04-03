@@ -15,6 +15,7 @@ const randomDirection = (exclude: Direction) => {
 		newDirection = Phaser.Math.Between(0, 3)
 	}
 
+  // 0 - 3
 	return newDirection
 }
 
@@ -40,7 +41,7 @@ export default class Skel extends Phaser.Physics.Arcade.Sprite {
     );
 
     this.moveEvent = scene.time.addEvent({
-      delay: 2000,
+      delay: Phaser.Math.Between(1000, 3000),
       callback: () => {
         this.direction = randomDirection(this.direction);
       },
@@ -68,7 +69,7 @@ export default class Skel extends Phaser.Physics.Arcade.Sprite {
   preUpdate(t: number, dt: number) {
     super.preUpdate(t, dt);
 
-    const speed = 50;
+    const speed = 35;
 
     switch (this.direction) {
       case Direction.UP:

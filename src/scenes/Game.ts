@@ -62,8 +62,9 @@ export default class Game extends Phaser.Scene {
     });
 
     skels.get(168, 96, "skel");
-    skels.get(106, 40, "skel");
-    skels.get(100, 126, "skel");
+    setInterval(() => {
+      skels.get(168, 96, "skel");
+    }, 10000);
 
     // столкновение (со стенами)
     this.physics.add.collider(this.fauna, wallsLayer);
