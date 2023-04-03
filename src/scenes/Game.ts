@@ -2,7 +2,7 @@ import Phaser from "phaser";
 import { createSkelAnims } from "../anims/EnemyAnims";
 import { createCharacterAnims } from "../anims/CharacterAnims";
 import Skel from "../enemies/Skel";
-// import debugDraw from "../utils/debug";
+import debugDraw from "../utils/debug";
 
 export default class Game extends Phaser.Scene {
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
@@ -45,7 +45,8 @@ export default class Game extends Phaser.Scene {
     wallsLayer.setCollisionByProperty({ collides: true });
     itemsLayer.setCollisionByProperty({ collides: true });
 
-    // debugDraw(this, wallsLayer);
+    debugDraw(this, wallsLayer);
+    debugDraw(this, itemsLayer);
 
     // персонаж
     this.fauna = this.physics.add.sprite(128, 128, "fauna", "walk-down-3.png");
@@ -74,6 +75,10 @@ export default class Game extends Phaser.Scene {
     // столкновение (со стенами)
     this.physics.add.collider(this.fauna, wallsLayer);
     this.physics.add.collider(skels, wallsLayer);
+
+    // столкновение (с предметами)
+    this.physics.add.collider(this.fauna, itemsLayer);
+    this.physics.add.collider(skels, itemsLayer);
   }
 
   update(): void {
