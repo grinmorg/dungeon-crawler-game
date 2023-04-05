@@ -11,6 +11,8 @@ export default class Game extends Phaser.Scene {
   private keyS!: Phaser.Input.Keyboard.Key;
   private keyD!: Phaser.Input.Keyboard.Key;
   private keyW!: Phaser.Input.Keyboard.Key;
+  private hit = 0;
+  // private particles!: Phaser.GameObjects.Particles.ParticleEmitterManager;
 
   constructor() {
     super("game");
@@ -22,12 +24,12 @@ export default class Game extends Phaser.Scene {
     this.keyS = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
     this.keyD = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);
     this.keyW = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W);
+    // this.particles = this.add.particles("smoke");
   }
 
   create() {
     createCharacterAnims(this.anims);
     createSkelAnims(this.anims);
-
     // this.add.image(0,0,'tiles');
 
     // создаю сцену из tilemap json
@@ -52,7 +54,7 @@ export default class Game extends Phaser.Scene {
     this.fauna = this.physics.add.sprite(128, 128, "fauna", "walk-down-3.png");
 
     // делаю чуть меньше хитбокс
-    this.fauna.body.setSize(this.fauna.width * 0.5, this.fauna.height * 0.50);
+    this.fauna.body.setSize(this.fauna.width * 0.5, this.fauna.height * 0.5);
     this.fauna.body.offset.y = 14;
 
     // ставлю в изначальную позицию
@@ -67,10 +69,10 @@ export default class Game extends Phaser.Scene {
       classType: Skel,
     });
 
-    skels.get(168, 96, "skel");
+    skels.get(68, 96, "skel");
     setInterval(() => {
-      skels.get(168, 96, "skel");
-    }, 10000);
+      skels.get(568, 296, "skel");
+    }, 1000);
 
     // столкновение (со стенами)
     this.physics.add.collider(this.fauna, wallsLayer);
@@ -79,9 +81,54 @@ export default class Game extends Phaser.Scene {
     // столкновение (с предметами)
     this.physics.add.collider(this.fauna, itemsLayer);
     this.physics.add.collider(skels, itemsLayer);
+
+    // игрока с мобами
+    this.physics.add.collider(
+      this.fauna,
+      skels,
+      this.handlePlayerSkedCollision,
+      undefined,
+      this
+    );
+  }
+
+  private handlePlayerSkedCollision(
+    obj1: Phaser.GameObjects.GameObject,
+    obj2: Phaser.GameObjects.GameObject
+  ) {
+    const skel = obj2 as Skel;
+
+    const dx = this.fauna.x - skel.x;
+    const dy = this.fauna.y - skel.y;
+
+    // { x: -169.20240379829326, y: -106.63276489371978 }
+    const dir = new Phaser.Math.Vector2(dx, dy).normalize().scale(200);
+
+    this.fauna.setVelocity(dir.x, dir.y);
+
+    this.hit = 1;
+
+    // this.fauna.handleDamage(dir)
+
+    // sceneEvents.emit('player-health-changed', this.fauna.health)
+
+    // if (this.fauna.health <= 0)
+    // {
+    // 	this.playerLizardsCollider?.destroy()
+    // }
   }
 
   update(): void {
+    if (this.hit > 0) {
+      ++this.hit;
+
+      if (this.hit > 10) {
+        this.hit = 0;
+      }
+
+      return;
+    }
+
     if (!this.cursors || !this.fauna) {
       return;
     }

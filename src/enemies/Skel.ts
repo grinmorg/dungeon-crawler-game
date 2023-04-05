@@ -40,6 +40,7 @@ export default class Skel extends Phaser.Physics.Arcade.Sprite {
       this
     );
 
+    // change direction every 1-3 sec
     this.moveEvent = scene.time.addEvent({
       delay: Phaser.Math.Between(1000, 3000),
       callback: () => {
@@ -49,6 +50,7 @@ export default class Skel extends Phaser.Physics.Arcade.Sprite {
     });
   }
 
+  // destory all events
   destroy(fromScene?: boolean) {
     this.moveEvent.destroy();
 
