@@ -112,8 +112,6 @@ export default class Game extends Phaser.Scene {
     // { x: -169.20240379829326, y: -106.63276489371978 }
     const dir = new Phaser.Math.Vector2(dx, dy).normalize().scale(200);
 
-    this.hit = 1;
-
     this.fauna.handleDamage(dir);
 
     // sceneEvents.emit('player-health-changed', this.fauna.health)
