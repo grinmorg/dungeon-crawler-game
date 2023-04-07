@@ -3,27 +3,39 @@ import { createSkelAnims } from "../anims/EnemyAnims";
 import { createCharacterAnims } from "../anims/CharacterAnims";
 import Skel from "../enemies/Skel";
 import debugDraw from "../utils/debug";
+import { IAddKeys } from "../@types/player";
+
+import Fauna from "../characters/Fauna";
+import "../characters/Fauna";
 
 export default class Game extends Phaser.Scene {
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
-  private fauna!: Phaser.Physics.Arcade.Sprite;
-  private keyA!: Phaser.Input.Keyboard.Key;
-  private keyS!: Phaser.Input.Keyboard.Key;
-  private keyD!: Phaser.Input.Keyboard.Key;
-  private keyW!: Phaser.Input.Keyboard.Key;
-  private hit = 0;
+  private fauna!: Fauna;
+  private addKeys!: IAddKeys;
+
   // private particles!: Phaser.GameObjects.Particles.ParticleEmitterManager;
 
   constructor() {
     super("game");
+
+    this.addKeys = {} as IAddKeys;
   }
 
   preload() {
     this.cursors = this.input.keyboard.createCursorKeys();
-    this.keyA = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
-    this.keyS = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
-    this.keyD = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);
-    this.keyW = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W);
+
+    this.addKeys.w = this.input.keyboard.addKey(
+      Phaser.Input.Keyboard.KeyCodes.W
+    );
+    this.addKeys.a = this.input.keyboard.addKey(
+      Phaser.Input.Keyboard.KeyCodes.A
+    );
+    this.addKeys.s = this.input.keyboard.addKey(
+      Phaser.Input.Keyboard.KeyCodes.S
+    );
+    this.addKeys.d = this.input.keyboard.addKey(
+      Phaser.Input.Keyboard.KeyCodes.D
+    );
     // this.particles = this.add.particles("smoke");
   }
 
@@ -51,11 +63,7 @@ export default class Game extends Phaser.Scene {
     debugDraw(this, itemsLayer);
 
     // персонаж
-    this.fauna = this.physics.add.sprite(128, 128, "fauna", "walk-down-3.png");
-
-    // делаю чуть меньше хитбокс
-    this.fauna.body.setSize(this.fauna.width * 0.5, this.fauna.height * 0.5);
-    this.fauna.body.offset.y = 14;
+    this.fauna = this.add.fauna(128, 128, "fauna");
 
     // ставлю в изначальную позицию
     this.fauna.setPosition(48, 48);
@@ -93,7 +101,7 @@ export default class Game extends Phaser.Scene {
   }
 
   private handlePlayerSkedCollision(
-    obj1: Phaser.GameObjects.GameObject,
+    _: Phaser.GameObjects.GameObject,
     obj2: Phaser.GameObjects.GameObject
   ) {
     const skel = obj2 as Skel;
@@ -104,11 +112,9 @@ export default class Game extends Phaser.Scene {
     // { x: -169.20240379829326, y: -106.63276489371978 }
     const dir = new Phaser.Math.Vector2(dx, dy).normalize().scale(200);
 
-    this.fauna.setVelocity(dir.x, dir.y);
-
     this.hit = 1;
 
-    // this.fauna.handleDamage(dir)
+    this.fauna.handleDamage(dir);
 
     // sceneEvents.emit('player-health-changed', this.fauna.health)
 
@@ -119,112 +125,8 @@ export default class Game extends Phaser.Scene {
   }
 
   update(): void {
-    if (this.hit > 0) {
-      ++this.hit;
-
-      if (this.hit > 10) {
-        this.hit = 0;
-      }
-
-      return;
-    }
-
-    if (!this.cursors || !this.fauna) {
-      return;
-    }
-
-    const speed = 100;
-    const speedSide = 80;
-
-    //right && up
-    if (
-      (this.cursors.right?.isDown && this.cursors.up?.isDown) ||
-      (this.keyD.isDown && this.keyW.isDown)
-    ) {
-      this.fauna.anims.play("fauna-run-side", true);
-      this.fauna.setVelocity(speedSide, -speedSide);
-      this.fauna.scaleX = 1;
-
-      // bugfix - проход сквозь стены
-      this.fauna.body.offset.x = 8;
-    }
-    //right && down
-    else if (
-      (this.cursors.right?.isDown && this.cursors.down?.isDown) ||
-      (this.keyD.isDown && this.keyS.isDown)
-    ) {
-      this.fauna.anims.play("fauna-run-side", true);
-      this.fauna.setVelocity(speedSide, speedSide);
-      this.fauna.scaleX = 1;
-
-      // bugfix - проход сквозь стены
-      this.fauna.body.offset.x = 8;
-    }
-    //left && up
-    else if (
-      (this.cursors.left?.isDown && this.cursors.up?.isDown) ||
-      (this.keyA.isDown && this.keyW.isDown)
-    ) {
-      this.fauna.anims.play("fauna-run-side", true);
-      this.fauna.setVelocity(-speedSide, -speedSide);
-      this.fauna.scaleX = -1;
-
-      // bugfix - проход сквозь стены
-      this.fauna.body.offset.x = 24;
-    }
-    //left && down
-    else if (
-      (this.cursors.left?.isDown && this.cursors.down?.isDown) ||
-      (this.keyA.isDown && this.keyS.isDown)
-    ) {
-      this.fauna.anims.play("fauna-run-side", true);
-      this.fauna.setVelocity(-speedSide, speedSide);
-      this.fauna.scaleX = -1;
-
-      // bugfix - проход сквозь стены
-      this.fauna.body.offset.x = 24;
-    }
-    // left
-    else if (this.cursors.left?.isDown || this.keyA.isDown) {
-      this.fauna.anims.play("fauna-run-side", true);
-      this.fauna.setVelocity(-speed, 0);
-      this.fauna.scaleX = -1;
-
-      // bugfix - проход сквозь стены
-      this.fauna.body.offset.x = 24;
-    }
-    //right
-    else if (this.cursors.right?.isDown || this.keyD.isDown) {
-      this.fauna.anims.play("fauna-run-side", true);
-      this.fauna.setVelocity(speed, 0);
-      this.fauna.scaleX = 1;
-
-      // bugfix - проход сквозь стены
-      this.fauna.body.offset.x = 8;
-    }
-    // up
-    else if (this.cursors.up?.isDown || this.keyW.isDown) {
-      this.fauna.anims.play("fauna-run-up", true);
-      this.fauna.setVelocity(0, -speed);
-      this.fauna.scaleX = 1;
-
-      // bugfix - проход сквозь стены
-      this.fauna.body.offset.x = 8;
-    }
-    // down
-    else if (this.cursors.down?.isDown || this.keyS.isDown) {
-      this.fauna.anims.play("fauna-run-down", true);
-      this.fauna.setVelocity(0, speed);
-      this.fauna.scaleX = 1;
-
-      // bugfix - проход сквозь стены
-      this.fauna.body.offset.x = 8;
-    }
-
-    // idle
-    else {
-      this.fauna.anims.play("fauna-idle-down", true);
-      this.fauna.setVelocity(0, 0);
+    if (this.fauna) {
+      this.fauna.update(this.cursors, this.addKeys);
     }
   }
 }
