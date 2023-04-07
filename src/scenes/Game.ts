@@ -59,8 +59,10 @@ export default class Game extends Phaser.Scene {
     wallsLayer.setCollisionByProperty({ collides: true });
     itemsLayer.setCollisionByProperty({ collides: true });
 
-    debugDraw(this, wallsLayer);
-    debugDraw(this, itemsLayer);
+    if (import.meta.env.DEV) {
+      debugDraw(this, wallsLayer);
+      debugDraw(this, itemsLayer);
+    }
 
     // персонаж
     this.fauna = this.add.fauna(128, 128, "fauna");
