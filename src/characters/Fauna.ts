@@ -24,7 +24,11 @@ export default class Fauna extends Phaser.Physics.Arcade.Sprite {
   private healthState = HealthState.IDLE;
   private damageTime = 0;
 
-  private _health = 10;
+  private _health = 5;
+
+  get health() {
+    return this._health;
+  }
 
   constructor(
     scene: Phaser.Scene,
@@ -46,6 +50,11 @@ export default class Fauna extends Phaser.Physics.Arcade.Sprite {
       return;
     }
     --this._health;
+
+    // sound
+    const soundDamage = this.scene.sound.add("player-damage");
+    soundDamage.play();
+
     if (this._health <= 0) {
       this.healthState = HealthState.DEAD;
       this.anims.play("fauna-faint");
@@ -77,7 +86,6 @@ export default class Fauna extends Phaser.Physics.Arcade.Sprite {
   }
 
   update(cursors: Phaser.Types.Input.Keyboard.CursorKeys, addKeys: IAddKeys) {
-    
     // if dead - not inputs
     if (
       this.healthState === HealthState.DAMAGE ||

@@ -7,14 +7,12 @@ import { IAddKeys } from "../@types/player";
 
 import Fauna from "../characters/Fauna";
 import "../characters/Fauna";
+import { sceneEvents } from "../events/EventsCenter";
 
 export default class Game extends Phaser.Scene {
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   private fauna!: Fauna;
   private addKeys!: IAddKeys;
-
-  // private particles!: Phaser.GameObjects.Particles.ParticleEmitterManager;
-
   constructor() {
     super("game");
 
@@ -36,10 +34,21 @@ export default class Game extends Phaser.Scene {
     this.addKeys.d = this.input.keyboard.addKey(
       Phaser.Input.Keyboard.KeyCodes.D
     );
-    // this.particles = this.add.particles("smoke");
   }
 
   create() {
+    // музыка на задний фон || ТОЛЬКО ДЛЯ ПРОДА))
+    if (import.meta.env.PROD) {
+      const soundBack = this.sound.add("back");
+      soundBack.play({
+        rate: 2,
+        loop: true,
+        volume: 0.3,
+      });
+    }
+
+    this.scene.run("game-ui");
+
     createCharacterAnims(this.anims);
     createSkelAnims(this.anims);
     // this.add.image(0,0,'tiles');
@@ -81,7 +90,8 @@ export default class Game extends Phaser.Scene {
 
     skels.get(68, 96, "skel");
     setInterval(() => {
-      skels.get(568, 296, "skel");
+      skels.get(68, 96, "skel");
+      // skels.get(568, 296, "skel");
     }, 1000);
 
     // столкновение (со стенами)
@@ -91,6 +101,38 @@ export default class Game extends Phaser.Scene {
     // столкновение (с предметами)
     this.physics.add.collider(this.fauna, itemsLayer);
     this.physics.add.collider(skels, itemsLayer);
+
+    // столкновение (между скелетами)
+    this.physics.add.overlap(
+      skels,
+      skels,
+      (
+        skel1: Phaser.GameObjects.GameObject,
+        skel2: Phaser.GameObjects.GameObject
+      ) => {
+        // При столкновении скелет в которого вошли - умирает
+        skel2.destroy();
+
+        const soundDeathSkel = this.sound.add("skel-dead");
+        soundDeathSkel.play({
+          rate: 2,
+        });
+
+        // Немного дыма при столкновении
+        const particles = this.add.particles("smoke");
+        const emitter = particles.createEmitter({
+          x: skel1.body.position.x,
+          y: skel1.body.position.y,
+          lifespan: 700,
+          speed: { min: 50, max: 100 },
+          scale: { start: 0.3, end: 0.2 },
+          blendMode: "ADD",
+        });
+
+        // Explode the particles
+        emitter.explode(1, skel1.body.position.x, skel1.body.position.y);
+      }
+    );
 
     // игрока с мобами
     this.physics.add.collider(
@@ -116,7 +158,7 @@ export default class Game extends Phaser.Scene {
 
     this.fauna.handleDamage(dir);
 
-    // sceneEvents.emit('player-health-changed', this.fauna.health)
+    sceneEvents.emit('player-health-changed', this.fauna.health)
 
     // if (this.fauna.health <= 0)
     // {

@@ -11,9 +11,19 @@ export default class Preloader extends Phaser.Scene {
     this.load.atlas("fauna", "characters/fauna/fauna.png", "characters/fauna/fauna.json");
     this.load.atlas("skel", "enemies/skel/skel.png", "enemies/skel/skel.json");
   
+    // ui
+    this.load.image("ui-heart-empty", "ui/ui_heart_empty.png");
+    this.load.image("ui-heart-half", "ui/ui_heart_half.png");
+    this.load.image("ui-heart-full", "ui/ui_heart_full.png");
+
     // particles
     this.load.image("smoke", "particles/white-smoke.png");
   
+
+    // audio
+    this.load.audio('skel-dead', 'audio/skeleton.mp3');
+    this.load.audio('back', 'audio/back.mp3');
+    this.load.audio('player-damage', 'audio/player-damage.wav');
   }
 
   create() {
