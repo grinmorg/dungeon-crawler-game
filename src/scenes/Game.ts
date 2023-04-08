@@ -13,6 +13,8 @@ export default class Game extends Phaser.Scene {
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   private fauna!: Fauna;
   private addKeys!: IAddKeys;
+  private playerSkelsCollider?: Phaser.Physics.Arcade.Collider;
+
   constructor() {
     super("game");
 
@@ -135,7 +137,7 @@ export default class Game extends Phaser.Scene {
     );
 
     // игрока с мобами
-    this.physics.add.collider(
+    this.playerSkelsCollider = this.physics.add.collider(
       this.fauna,
       skels,
       this.handlePlayerSkedCollision,
@@ -158,12 +160,11 @@ export default class Game extends Phaser.Scene {
 
     this.fauna.handleDamage(dir);
 
-    sceneEvents.emit('player-health-changed', this.fauna.health)
+    sceneEvents.emit("player-health-changed", this.fauna.health);
 
-    // if (this.fauna.health <= 0)
-    // {
-    // 	this.playerLizardsCollider?.destroy()
-    // }
+    if (this.fauna.health <= 0) {
+      this.playerSkelsCollider?.destroy();
+    }
   }
 
   update(): void {

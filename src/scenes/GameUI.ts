@@ -38,14 +38,12 @@ export default class GameUI extends Phaser.Scene {
         this.handlePlayerHealthChanged,
         this
       );
-      sceneEvents.off("player-coins-changed");
+      // sceneEvents.off("player-coins-changed");
     });
   }
 
   private handlePlayerHealthChanged(health: number) {
     this.hearts.children.each((go, idx) => {
-		console.log(go, health);
-		
       const heart = go as Phaser.GameObjects.Image;
       if (idx < health) {
         heart.setTexture("ui-heart-full");
