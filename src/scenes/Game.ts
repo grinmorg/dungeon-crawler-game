@@ -161,7 +161,7 @@ export default class Game extends Phaser.Scene {
 
   private handleKnifeWallCollision(
     obj1: Phaser.GameObjects.GameObject,
-    obj2: Phaser.GameObjects.GameObject
+    _: Phaser.GameObjects.GameObject
   ) {
     this.knives.killAndHide(obj1);
   }
