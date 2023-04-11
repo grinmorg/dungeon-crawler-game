@@ -13,6 +13,8 @@ export default class Game extends Phaser.Scene {
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   private fauna!: Fauna;
   private addKeys!: IAddKeys;
+  private knives!: Phaser.Physics.Arcade.Group;
+  private skels!: Phaser.Physics.Arcade.Group;
   private playerSkelsCollider?: Phaser.Physics.Arcade.Collider;
 
   constructor() {
@@ -40,14 +42,14 @@ export default class Game extends Phaser.Scene {
 
   create() {
     // музыка на задний фон || ТОЛЬКО ДЛЯ ПРОДА))
-    if (import.meta.env.PROD) {
-      const soundBack = this.sound.add("back");
-      soundBack.play({
-        rate: 2,
-        loop: true,
-        volume: 0.3,
-      });
-    }
+    // if (import.meta.env.PROD) {
+    //   const soundBack = this.sound.add("back");
+    //   soundBack.play({
+    //     rate: 2,
+    //     loop: true,
+    //     volume: 0.3,
+    //   });
+    // }
 
     this.scene.run("game-ui");
 
@@ -70,10 +72,11 @@ export default class Game extends Phaser.Scene {
     wallsLayer.setCollisionByProperty({ collides: true });
     itemsLayer.setCollisionByProperty({ collides: true });
 
-    if (import.meta.env.DEV) {
-      debugDraw(this, wallsLayer);
-      debugDraw(this, itemsLayer);
-    }
+    // создание ножей
+    this.knives = this.physics.add.group({
+      classType: Phaser.Physics.Arcade.Image,
+      maxSize: 3,
+    });
 
     // персонаж
     this.fauna = this.add.fauna(128, 128, "fauna");
@@ -81,69 +84,94 @@ export default class Game extends Phaser.Scene {
     // ставлю в изначальную позицию
     this.fauna.setPosition(48, 48);
 
+    // ножи для игрока
+    this.fauna.setKnives(this.knives);
+
+    if (import.meta.env.DEV) {
+      debugDraw(this, wallsLayer);
+      debugDraw(this, itemsLayer);
+    }
+
     // camera
     this.cameras.main.startFollow(this.fauna, true);
     // this.fauna.anims.play('fauna-run-side');
 
     // моб скелет
-    const skels = this.physics.add.group({
+    this.skels = this.physics.add.group({
       classType: Skel,
     });
 
-    skels.get(68, 96, "skel");
-    setInterval(() => {
-      skels.get(68, 96, "skel");
-      // skels.get(568, 296, "skel");
-    }, 1000);
+    for(let i = 0; i < 10; i++) {
+      this.skels.get(168, 100, "skel");
+    }
 
     // столкновение (со стенами)
     this.physics.add.collider(this.fauna, wallsLayer);
-    this.physics.add.collider(skels, wallsLayer);
+    this.physics.add.collider(this.skels, wallsLayer);
+    this.physics.add.collider(this.knives, wallsLayer, this.handleKnifeWallCollision, undefined, this);
 
     // столкновение (с предметами)
     this.physics.add.collider(this.fauna, itemsLayer);
-    this.physics.add.collider(skels, itemsLayer);
+    this.physics.add.collider(this.skels, itemsLayer);
 
     // столкновение (между скелетами)
-    this.physics.add.overlap(
-      skels,
-      skels,
-      (
-        skel1: Phaser.GameObjects.GameObject,
-        skel2: Phaser.GameObjects.GameObject
-      ) => {
-        // При столкновении скелет в которого вошли - умирает
-        skel2.destroy();
+    // this.physics.add.overlap(
+    //   this.skels,
+    //   this.skels,
+    //   (
+    //     skel1: Phaser.GameObjects.GameObject,
+    //     skel2: Phaser.GameObjects.GameObject
+    //   ) => {
+    //     // При столкновении скелет в которого вошли - умирает
+    //     skel2.destroy();
 
-        const soundDeathSkel = this.sound.add("skel-dead");
-        soundDeathSkel.play({
-          rate: 2,
-        });
+    //     const soundDeathSkel = this.sound.add("skel-dead");
+    //     soundDeathSkel.play({
+    //       rate: 2,
+    //     });
 
-        // Немного дыма при столкновении
-        const particles = this.add.particles("smoke");
-        const emitter = particles.createEmitter({
-          x: skel1.body.position.x,
-          y: skel1.body.position.y,
-          lifespan: 700,
-          speed: { min: 50, max: 100 },
-          scale: { start: 0.3, end: 0.2 },
-          blendMode: "ADD",
-        });
+    //     // Немного дыма при столкновении
+    //     const particles = this.add.particles("smoke");
+    //     const emitter = particles.createEmitter({
+    //       x: skel1.body.position.x,
+    //       y: skel1.body.position.y,
+    //       lifespan: 700,
+    //       speed: { min: 50, max: 100 },
+    //       scale: { start: 0.3, end: 0.2 },
+    //       blendMode: "ADD",
+    //     });
 
-        // Explode the particles
-        emitter.explode(1, skel1.body.position.x, skel1.body.position.y);
-      }
-    );
+    //     // Explode the particles
+    //     emitter.explode(1, skel1.body.position.x, skel1.body.position.y);
+    //   }
+    // );
 
-    // игрока с мобами
+    // столкновение игрока с мобами
     this.playerSkelsCollider = this.physics.add.collider(
       this.fauna,
-      skels,
+      this.skels,
       this.handlePlayerSkedCollision,
       undefined,
       this
     );
+
+    // столкновение ножей со скелетами
+    this.physics.add.collider(this.knives, this.skels, this.handleKnifeSkelsCollision, undefined, this);
+  }
+
+  private handleKnifeWallCollision(
+    obj1: Phaser.GameObjects.GameObject,
+    obj2: Phaser.GameObjects.GameObject
+  ) {
+    this.knives.killAndHide(obj1);
+  }
+
+  private handleKnifeSkelsCollision(
+    obj1: Phaser.GameObjects.GameObject,
+    obj2: Phaser.GameObjects.GameObject
+  ) {
+    this.knives.killAndHide(obj1);
+    this.skels.killAndHide(obj2);
   }
 
   private handlePlayerSkedCollision(

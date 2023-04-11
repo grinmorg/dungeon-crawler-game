@@ -26,6 +26,8 @@ export default class Fauna extends Phaser.Physics.Arcade.Sprite {
 
   private _health = 5;
 
+  private knives?: Phaser.Physics.Arcade.Group;
+
   get health() {
     return this._health;
   }
@@ -40,6 +42,10 @@ export default class Fauna extends Phaser.Physics.Arcade.Sprite {
     super(scene, x, y, texture, frame);
 
     this.anims.play("fauna-idle-down");
+  }
+
+  setKnives(knives: Phaser.Physics.Arcade.Group) {
+    this.knives = knives;
   }
 
   handleDamage(dir: Phaser.Math.Vector2) {
@@ -65,6 +71,57 @@ export default class Fauna extends Phaser.Physics.Arcade.Sprite {
       this.healthState = HealthState.DAMAGE;
       this.damageTime = 0;
     }
+  }
+
+  private throwKnife() {
+    if (!this.knives) {
+      return;
+    }
+
+    const knife = this.knives.get(
+      this.x,
+      this.y,
+      "knife"
+    ) as Phaser.Physics.Arcade.Image;
+    if (!knife) {
+      return;
+    }
+
+    const parts = this.anims.currentAnim.key.split("-");
+    const direction = parts[2];
+
+    const vec = new Phaser.Math.Vector2(0, 0);
+
+    switch (direction) {
+      case "up":
+        vec.y = -1;
+        break;
+
+      case "down":
+        vec.y = 1;
+        break;
+
+      default:
+      case "side":
+        if (this.scaleX < 0) {
+          vec.x = -1;
+        } else {
+          vec.x = 1;
+        }
+        break;
+    }
+
+    const angle = vec.angle();
+
+    knife.setActive(true);
+    knife.setVisible(true);
+
+    knife.setRotation(angle);
+
+    knife.x += vec.x * 16;
+    knife.y += vec.y * 16;
+
+    knife.setVelocity(vec.x * 300, vec.y * 300);
   }
 
   preUpdate(t: number, dt: number) {
@@ -97,6 +154,22 @@ export default class Fauna extends Phaser.Physics.Arcade.Sprite {
     if (!cursors) {
       return;
     }
+
+    if (Phaser.Input.Keyboard.JustDown(cursors.space!))
+		{
+			// if (this.activeChest)
+			// {
+			// 	const coins = this.activeChest.open()
+			// 	this._coins += coins
+
+			// 	sceneEvents.emit('player-coins-changed', this._coins)
+			// }
+			// else
+			// {
+				this.throwKnife()
+			// }
+			// return
+		}
 
     const speed = 100;
     const speedSide = 80;
