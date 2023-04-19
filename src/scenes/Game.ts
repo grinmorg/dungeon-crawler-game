@@ -71,13 +71,6 @@ export default class Game extends Phaser.Scene {
     // Добавляю стенам свойство
     wallsLayer.setCollisionByProperty({ collides: true });
     itemsLayer.setCollisionByProperty({ collides: true });
-
-    // создание ножей
-    this.knives = this.physics.add.group({
-      classType: Phaser.Physics.Arcade.Image,
-      maxSize: 3,
-    });
-
     // персонаж
     this.fauna = this.add.fauna(128, 128, "fauna");
 
@@ -85,6 +78,11 @@ export default class Game extends Phaser.Scene {
     this.fauna.setPosition(48, 48);
 
     // ножи для игрока
+    // создание ножей
+    this.knives = this.physics.add.group({
+      classType: Phaser.Physics.Arcade.Image,
+      maxSize: 3,
+    });
     this.fauna.setKnives(this.knives);
 
     if (import.meta.env.DEV) {

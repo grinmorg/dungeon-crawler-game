@@ -83,6 +83,7 @@ export default class Fauna extends Phaser.Physics.Arcade.Sprite {
       this.y,
       "knife"
     ) as Phaser.Physics.Arcade.Image;
+    
     if (!knife) {
       return;
     }
@@ -90,7 +91,7 @@ export default class Fauna extends Phaser.Physics.Arcade.Sprite {
     const parts = this.anims.currentAnim.key.split("-");
     const direction = parts[2];
 
-    const vec = new Phaser.Math.Vector2(0, 0);
+    const vec = new Phaser.Math.Vector2(0, 0); // {x: 0, y: 0}
 
     switch (direction) {
       case "up":
@@ -112,15 +113,17 @@ export default class Fauna extends Phaser.Physics.Arcade.Sprite {
     }
 
     const angle = vec.angle();
-
+    
     knife.setActive(true);
     knife.setVisible(true);
 
     knife.setRotation(angle);
 
+    // start position
     knife.x += vec.x * 16;
     knife.y += vec.y * 16;
-
+    
+    // speed knife
     knife.setVelocity(vec.x * 300, vec.y * 300);
   }
 
@@ -155,21 +158,20 @@ export default class Fauna extends Phaser.Physics.Arcade.Sprite {
       return;
     }
 
-    if (Phaser.Input.Keyboard.JustDown(cursors.space!))
-		{
-			// if (this.activeChest)
-			// {
-			// 	const coins = this.activeChest.open()
-			// 	this._coins += coins
+    if (Phaser.Input.Keyboard.JustDown(cursors.space!)) {
+      // if (this.activeChest)
+      // {
+      // 	const coins = this.activeChest.open()
+      // 	this._coins += coins
 
-			// 	sceneEvents.emit('player-coins-changed', this._coins)
-			// }
-			// else
-			// {
-				this.throwKnife()
-			// }
-			// return
-		}
+      // 	sceneEvents.emit('player-coins-changed', this._coins)
+      // }
+      // else
+      // {
+      this.throwKnife();
+      // }
+      // return
+    }
 
     const speed = 100;
     const speedSide = 80;
