@@ -8,6 +8,7 @@ import { IAddKeys } from "../@types/player";
 import Fauna from "../characters/Fauna";
 import "../characters/Fauna";
 import { sceneEvents } from "../events/EventsCenter";
+import { createChestAnims } from "../anims/ChestAnims";
 
 export default class Game extends Phaser.Scene {
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
@@ -42,19 +43,20 @@ export default class Game extends Phaser.Scene {
 
   create() {
     // музыка на задний фон || ТОЛЬКО ДЛЯ ПРОДА))
-    // if (import.meta.env.PROD) {
-    //   const soundBack = this.sound.add("back");
-    //   soundBack.play({
-    //     rate: 2,
-    //     loop: true,
-    //     volume: 0.3,
-    //   });
-    // }
+    if (import.meta.env.PROD) {
+      const soundBack = this.sound.add("back");
+      soundBack.play({
+        rate: 1,
+        loop: true,
+        volume: 0.1,
+      });
+    }
 
     this.scene.run("game-ui");
 
     createCharacterAnims(this.anims);
     createSkelAnims(this.anims);
+    createChestAnims(this.anims);
     // this.add.image(0,0,'tiles');
 
     // создаю сцену из tilemap json
@@ -66,7 +68,14 @@ export default class Game extends Phaser.Scene {
     map.createLayer("Ground", tileset);
 
     const wallsLayer = map.createLayer("Walls", tileset);
-    const itemsLayer = map.createLayer("Items", tileset);
+    const itemsLayer = map.createLayer("Items", tileset); // огонь на стенах, колонны и тд
+
+    // сундуки
+    const chests = this.physics.add.staticGroup();
+    const chestLayer = map.getObjectLayer("Chests");
+    chestLayer.objects.forEach((chestObj) => {
+      chests.get(chestObj.x! + chestObj.width! * 0.5, chestObj.y! - chestObj.height! * 0.5, 'treasure'); // removed chest_empty_open_anim_f0.png
+    });
 
     // Добавляю стенам свойство
     wallsLayer.setCollisionByProperty({ collides: true });
@@ -99,18 +108,32 @@ export default class Game extends Phaser.Scene {
       classType: Skel,
     });
 
-    for(let i = 0; i < 10; i++) {
-      this.skels.get(168, 100, "skel");
+    this.skels.get(168, 100, "skel");
+    // Создаю несколько скелетов в соседней комнате
+    // TODO: Перенести это потом в tilemap
+    for (let i = 0; i < 10; i++) {
+      this.skels.get(
+        568 + Math.random() * 10,
+        200 + Math.random() * 10,
+        "skel"
+      );
     }
 
     // столкновение (со стенами)
     this.physics.add.collider(this.fauna, wallsLayer);
     this.physics.add.collider(this.skels, wallsLayer);
-    this.physics.add.collider(this.knives, wallsLayer, this.handleKnifeWallCollision, undefined, this);
+    this.physics.add.collider(
+      this.knives,
+      wallsLayer,
+      this.handleKnifeWallCollision,
+      undefined,
+      this
+    );
 
     // столкновение (с предметами)
     this.physics.add.collider(this.fauna, itemsLayer);
     this.physics.add.collider(this.skels, itemsLayer);
+    this.physics.add.collider(this.fauna, chests);
 
     // столкновение (между скелетами)
     // this.physics.add.overlap(
@@ -154,7 +177,13 @@ export default class Game extends Phaser.Scene {
     );
 
     // столкновение ножей со скелетами
-    this.physics.add.collider(this.knives, this.skels, this.handleKnifeSkelsCollision, undefined, this);
+    this.physics.add.collider(
+      this.knives,
+      this.skels,
+      this.handleKnifeSkelsCollision,
+      undefined,
+      this
+    );
   }
 
   private handleKnifeWallCollision(

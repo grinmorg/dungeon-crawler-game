@@ -24,7 +24,7 @@ export default class Fauna extends Phaser.Physics.Arcade.Sprite {
   private healthState = HealthState.IDLE;
   private damageTime = 0;
 
-  private _health = 5;
+  private _health = 3;
 
   private knives?: Phaser.Physics.Arcade.Group;
 
@@ -57,15 +57,23 @@ export default class Fauna extends Phaser.Physics.Arcade.Sprite {
     }
     --this._health;
 
-    // sound
+    // sounds
     const soundDamage = this.scene.sound.add("player-damage");
-    soundDamage.play();
+    const soundBodyFall = this.scene.sound.add("body-fall");
 
     if (this._health <= 0) {
+      // sound play
+      soundBodyFall.play();
+
       this.healthState = HealthState.DEAD;
       this.anims.play("fauna-faint");
       this.setVelocity(0, 0);
     } else {
+      // sound play
+      soundDamage.play({
+        volume: 0.3,
+      });
+
       this.setVelocity(dir.x, dir.y);
       this.setTint(0xff0000);
       this.healthState = HealthState.DAMAGE;
@@ -78,12 +86,18 @@ export default class Fauna extends Phaser.Physics.Arcade.Sprite {
       return;
     }
 
+    // sound
+    const soundPow = this.scene.sound.add("pow");
+    soundPow.play({
+      volume: 0.3,
+    });
+
     const knife = this.knives.get(
       this.x,
       this.y,
       "knife"
     ) as Phaser.Physics.Arcade.Image;
-    
+
     if (!knife) {
       return;
     }
@@ -113,7 +127,7 @@ export default class Fauna extends Phaser.Physics.Arcade.Sprite {
     }
 
     const angle = vec.angle();
-    
+
     knife.setActive(true);
     knife.setVisible(true);
 
@@ -122,7 +136,7 @@ export default class Fauna extends Phaser.Physics.Arcade.Sprite {
     // start position
     knife.x += vec.x * 16;
     knife.y += vec.y * 16;
-    
+
     // speed knife
     knife.setVelocity(vec.x * 300, vec.y * 300);
   }

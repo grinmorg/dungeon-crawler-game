@@ -22,7 +22,7 @@ export default class GameUI extends Phaser.Scene {
         y: 10,
         stepX: 16, // space between
       },
-      quantity: 5,
+      quantity: 3,
     });
 
     // Слушаю событие - урон по игроку
