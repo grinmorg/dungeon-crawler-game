@@ -162,7 +162,7 @@ export default class Game extends Phaser.Scene {
   }
 
   private handlePlayerChestCollision(
-    obj1: Phaser.GameObjects.GameObject,
+    _: Phaser.GameObjects.GameObject,
     obj2: Phaser.GameObjects.GameObject
   ) {
     const chest = obj2 as Chest;
