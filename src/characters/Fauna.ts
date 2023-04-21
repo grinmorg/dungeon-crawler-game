@@ -1,5 +1,7 @@
 import Phaser from "phaser";
 import { IAddKeys } from "../@types/player";
+import Chest from "../items/Chest";
+import { sceneEvents } from "../events/EventsCenter";
 
 declare global {
   namespace Phaser.GameObjects {
@@ -25,8 +27,10 @@ export default class Fauna extends Phaser.Physics.Arcade.Sprite {
   private damageTime = 0;
 
   private _health = 3;
+  private _coins = 0;
 
   private knives?: Phaser.Physics.Arcade.Group;
+  private activeChest?: Chest;
 
   get health() {
     return this._health;
@@ -42,6 +46,10 @@ export default class Fauna extends Phaser.Physics.Arcade.Sprite {
     super(scene, x, y, texture, frame);
 
     this.anims.play("fauna-idle-down");
+  }
+
+  setChest(chest: Chest) {
+    this.activeChest = chest;
   }
 
   setKnives(knives: Phaser.Physics.Arcade.Group) {
@@ -86,12 +94,6 @@ export default class Fauna extends Phaser.Physics.Arcade.Sprite {
       return;
     }
 
-    // sound
-    const soundPow = this.scene.sound.add("pow");
-    soundPow.play({
-      volume: 0.3,
-    });
-
     const knife = this.knives.get(
       this.x,
       this.y,
@@ -101,6 +103,12 @@ export default class Fauna extends Phaser.Physics.Arcade.Sprite {
     if (!knife) {
       return;
     }
+
+    // sound
+    const soundPow = this.scene.sound.add("pow");
+    soundPow.play({
+      volume: 0.3,
+    });
 
     const parts = this.anims.currentAnim.key.split("-");
     const direction = parts[2];
@@ -134,8 +142,8 @@ export default class Fauna extends Phaser.Physics.Arcade.Sprite {
     knife.setRotation(angle);
 
     // start position
-    knife.x += vec.x * 16;
-    knife.y += vec.y * 16;
+    knife.x += vec.x * 8;
+    knife.y += vec.y * 8;
 
     // speed knife
     knife.setVelocity(vec.x * 300, vec.y * 300);
@@ -173,18 +181,17 @@ export default class Fauna extends Phaser.Physics.Arcade.Sprite {
     }
 
     if (Phaser.Input.Keyboard.JustDown(cursors.space!)) {
-      // if (this.activeChest)
-      // {
-      // 	const coins = this.activeChest.open()
-      // 	this._coins += coins
+      if (this.activeChest) {
+        const coins = this.activeChest.open();
+        console.log(coins);
 
-      // 	sceneEvents.emit('player-coins-changed', this._coins)
-      // }
-      // else
-      // {
-      this.throwKnife();
-      // }
-      // return
+        this._coins += coins;
+
+        sceneEvents.emit("player-coins-changed", this._coins);
+      } else {
+        this.throwKnife();
+      }
+      return;
     }
 
     const speed = 100;
@@ -285,6 +292,10 @@ export default class Fauna extends Phaser.Physics.Arcade.Sprite {
     else {
       this.anims.play("fauna-idle-down", true);
       this.setVelocity(0, 0);
+    }
+
+    if (leftMove || rightMove || upMove || downMove) {
+      this.activeChest = undefined;
     }
   }
 }

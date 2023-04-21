@@ -9,6 +9,7 @@ import Fauna from "../characters/Fauna";
 import "../characters/Fauna";
 import { sceneEvents } from "../events/EventsCenter";
 import { createChestAnims } from "../anims/ChestAnims";
+import Chest from "../items/Chest";
 
 export default class Game extends Phaser.Scene {
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
@@ -71,10 +72,16 @@ export default class Game extends Phaser.Scene {
     const itemsLayer = map.createLayer("Items", tileset); // огонь на стенах, колонны и тд
 
     // сундуки
-    const chests = this.physics.add.staticGroup();
+    const chests = this.physics.add.staticGroup({
+      classType: Chest,
+    });
     const chestLayer = map.getObjectLayer("Chests");
     chestLayer.objects.forEach((chestObj) => {
-      chests.get(chestObj.x! + chestObj.width! * 0.5, chestObj.y! - chestObj.height! * 0.5, 'treasure'); // removed chest_empty_open_anim_f0.png
+      chests.get(
+        chestObj.x! + chestObj.width! * 0.5,
+        chestObj.y! - chestObj.height! * 0.5,
+        "treasure"
+      ); // removed chest_empty_open_anim_f0.png
     });
 
     // Добавляю стенам свойство
@@ -108,16 +115,10 @@ export default class Game extends Phaser.Scene {
       classType: Skel,
     });
 
-    this.skels.get(168, 100, "skel");
-    // Создаю несколько скелетов в соседней комнате
-    // TODO: Перенести это потом в tilemap
-    for (let i = 0; i < 10; i++) {
-      this.skels.get(
-        568 + Math.random() * 10,
-        200 + Math.random() * 10,
-        "skel"
-      );
-    }
+    const skelsLayer = map.getObjectLayer("Skelets");
+    skelsLayer.objects.forEach((skelObj) => {
+      this.skels.get(skelObj.x! + skelObj.width! * 0.5, skelObj.y! + skelObj.height! * 0.5, "skel");
+    });
 
     // столкновение (со стенами)
     this.physics.add.collider(this.fauna, wallsLayer);
@@ -133,39 +134,13 @@ export default class Game extends Phaser.Scene {
     // столкновение (с предметами)
     this.physics.add.collider(this.fauna, itemsLayer);
     this.physics.add.collider(this.skels, itemsLayer);
-    this.physics.add.collider(this.fauna, chests);
-
-    // столкновение (между скелетами)
-    // this.physics.add.overlap(
-    //   this.skels,
-    //   this.skels,
-    //   (
-    //     skel1: Phaser.GameObjects.GameObject,
-    //     skel2: Phaser.GameObjects.GameObject
-    //   ) => {
-    //     // При столкновении скелет в которого вошли - умирает
-    //     skel2.destroy();
-
-    //     const soundDeathSkel = this.sound.add("skel-dead");
-    //     soundDeathSkel.play({
-    //       rate: 2,
-    //     });
-
-    //     // Немного дыма при столкновении
-    //     const particles = this.add.particles("smoke");
-    //     const emitter = particles.createEmitter({
-    //       x: skel1.body.position.x,
-    //       y: skel1.body.position.y,
-    //       lifespan: 700,
-    //       speed: { min: 50, max: 100 },
-    //       scale: { start: 0.3, end: 0.2 },
-    //       blendMode: "ADD",
-    //     });
-
-    //     // Explode the particles
-    //     emitter.explode(1, skel1.body.position.x, skel1.body.position.y);
-    //   }
-    // );
+    this.physics.add.collider(
+      this.fauna,
+      chests,
+      this.handlePlayerChestCollision,
+      undefined,
+      this
+    );
 
     // столкновение игрока с мобами
     this.playerSkelsCollider = this.physics.add.collider(
@@ -186,6 +161,15 @@ export default class Game extends Phaser.Scene {
     );
   }
 
+  private handlePlayerChestCollision(
+    obj1: Phaser.GameObjects.GameObject,
+    obj2: Phaser.GameObjects.GameObject
+  ) {
+    const chest = obj2 as Chest;
+
+    this.fauna.setChest(chest);
+  }
+
   private handleKnifeWallCollision(
     obj1: Phaser.GameObjects.GameObject,
     _: Phaser.GameObjects.GameObject
@@ -197,8 +181,31 @@ export default class Game extends Phaser.Scene {
     obj1: Phaser.GameObjects.GameObject,
     obj2: Phaser.GameObjects.GameObject
   ) {
-    this.knives.killAndHide(obj1);
-    this.skels.killAndHide(obj2);
+    obj1.destroy();
+
+    // эфект и звук
+
+    const soundDeathSkel = this.sound.add("skel-dead");
+    soundDeathSkel.play({
+      rate: 2,
+      volume: 0.2,
+    });
+
+    // Немного дыма при столкновении
+    const particles = this.add.particles("smoke");
+    const emitter = particles.createEmitter({
+      x: obj2.body.position.x,
+      y: obj2.body.position.y,
+      lifespan: 700,
+      speed: { min: 50, max: 100 },
+      scale: { start: 0.3, end: 0.2 },
+      blendMode: "ADD",
+    });
+
+    // Explode the particles
+    emitter.explode(1, obj2.body.position.x, obj2.body.position.y);
+
+    obj2.destroy();
   }
 
   private handlePlayerSkedCollision(
