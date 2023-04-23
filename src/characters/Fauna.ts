@@ -167,7 +167,7 @@ export default class Fauna extends Phaser.Physics.Arcade.Sprite {
     }
   }
 
-  update(cursors: Phaser.Types.Input.Keyboard.CursorKeys, addKeys: IAddKeys) {
+  update(cursors: Phaser.Types.Input.Keyboard.CursorKeys, addKeys: IAddKeys, movementJoyStick: any, touchdown: boolean) {
     // if dead - not inputs
     if (
       this.healthState === HealthState.DAMAGE ||
@@ -180,7 +180,8 @@ export default class Fauna extends Phaser.Physics.Arcade.Sprite {
       return;
     }
 
-    if (Phaser.Input.Keyboard.JustDown(cursors.space!)) {
+
+    if (Phaser.Input.Keyboard.JustDown(cursors.space!) || touchdown) {
       if (this.activeChest) {
         const coins = this.activeChest.open();
         console.log(coins);
@@ -199,21 +200,21 @@ export default class Fauna extends Phaser.Physics.Arcade.Sprite {
 
     const rightUpMove =
       (cursors.right?.isDown && cursors.up?.isDown) ||
-      (addKeys.d.isDown && addKeys.w.isDown);
+      (addKeys.d.isDown && addKeys.w.isDown) || (movementJoyStick?.angle >= -80 && movementJoyStick?.angle <= -10);
     const rightDownMove =
       (cursors.right?.isDown && cursors.down?.isDown) ||
-      (addKeys.d.isDown && addKeys.s.isDown);
+      (addKeys.d.isDown && addKeys.s.isDown) || (movementJoyStick?.angle >= 10 && movementJoyStick?.angle <= 80);
     const leftUpMove =
       (cursors.left?.isDown && cursors.up?.isDown) ||
-      (addKeys.a.isDown && addKeys.w.isDown);
+      (addKeys.a.isDown && addKeys.w.isDown) || (movementJoyStick?.angle >= -160 && movementJoyStick?.angle <= -110);
     const leftDownMove =
       (cursors.left?.isDown && cursors.down?.isDown) ||
-      (addKeys.a.isDown && addKeys.s.isDown);
+      (addKeys.a.isDown && addKeys.s.isDown) || (movementJoyStick?.angle >= 120 && movementJoyStick?.angle <= 170);
 
-    const leftMove = cursors.left?.isDown || addKeys.a.isDown;
-    const rightMove = cursors.right?.isDown || addKeys.d.isDown;
-    const upMove = cursors.up?.isDown || addKeys.w.isDown;
-    const downMove = cursors.down?.isDown || addKeys.s.isDown;
+    const leftMove = cursors.left?.isDown || addKeys.a.isDown || movementJoyStick?.left;
+    const rightMove = cursors.right?.isDown || addKeys.d.isDown || movementJoyStick?.right;
+    const upMove = cursors.up?.isDown || addKeys.w.isDown || movementJoyStick?.up;
+    const downMove = cursors.down?.isDown || addKeys.s.isDown ||  movementJoyStick?.down;
 
     //right && up
     if (rightUpMove) {

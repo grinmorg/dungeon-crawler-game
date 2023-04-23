@@ -1,4 +1,5 @@
 import Phaser from "phaser";
+import VirtualJoystickPlugin from "phaser3-rex-plugins/plugins/virtualjoystick-plugin.js";
 
 export default class Preloader extends Phaser.Scene {
   constructor() {
@@ -8,7 +9,7 @@ export default class Preloader extends Phaser.Scene {
   preload() {
     this.load.image("tiles", "tiles/dungeon_tiles_extrud.png");
     this.load.tilemapTiledJSON("dungeon", "tiles/dungeon-01.json");
-    
+
     // characters
     this.load.atlas(
       "fauna",
@@ -29,6 +30,8 @@ export default class Preloader extends Phaser.Scene {
     this.load.image("ui-heart-empty", "ui/ui_heart_empty.png");
     this.load.image("ui-heart-half", "ui/ui_heart_half.png");
     this.load.image("ui-heart-full", "ui/ui_heart_full.png");
+    this.load.image('joystick', 'ui/joystick.png');
+    this.load.image('knife-icon', 'ui/arrow-archery.svg');
 
     // particles
     this.load.image("smoke", "particles/white-smoke.png");
@@ -40,10 +43,15 @@ export default class Preloader extends Phaser.Scene {
     this.load.audio("body-fall", "audio/body-fall.mp3");
     this.load.audio("pow", "audio/pow.mp3");
     this.load.audio("collect-coins", "audio/collect-coins.mp3");
+
+    // joystick
+    this.load.plugin("rexvirtualjoystickplugin", VirtualJoystickPlugin, true);
   }
 
   create() {
     // запуск сцены game
     this.scene.start("game");
+
+    
   }
 }

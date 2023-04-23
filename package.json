@@ -14,8 +14,7 @@
     "vite": "^4.2.0"
   },
   "dependencies": {
-    "@firebase/app-types": "^0.9.0",
-    "firebase": "^9.18.0",
-    "phaser": "^3.55.2"
+    "phaser": "^3.55.2",
+    "phaser3-rex-plugins": "^1.60.0"
   }
 }

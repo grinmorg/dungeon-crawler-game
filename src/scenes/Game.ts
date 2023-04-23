@@ -10,14 +10,18 @@ import "../characters/Fauna";
 import { sceneEvents } from "../events/EventsCenter";
 import { createChestAnims } from "../anims/ChestAnims";
 import Chest from "../items/Chest";
+import VirtualJoyStickPlugin from "phaser3-rex-plugins/plugins/virtualjoystick-plugin";
+import { isMobileDevice } from "../helpers/global";
 
 export default class Game extends Phaser.Scene {
+  private movementJoyStick!: any;
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   private fauna!: Fauna;
   private addKeys!: IAddKeys;
   private knives!: Phaser.Physics.Arcade.Group;
   private skels!: Phaser.Physics.Arcade.Group;
   private playerSkelsCollider?: Phaser.Physics.Arcade.Collider;
+  private touchdown: boolean = false; //click on mobile
 
   constructor() {
     super("game");
@@ -43,6 +47,45 @@ export default class Game extends Phaser.Scene {
   }
 
   create() {
+    // Create movement joystick
+    if (isMobileDevice()) {
+      const movementJoystick = this.plugins.get(
+        "rexvirtualjoystickplugin"
+      ) as VirtualJoyStickPlugin;
+
+      this.movementJoyStick = movementJoystick.add(this, {
+        x: 100,
+        y: this.cameras.main.height - 125,
+        radius: 40,
+        forceMin: 0,
+        base: this.add.circle(0, 0, 30, 0x888888).setDepth(100).setAlpha(0.25),
+        thumb: this.add
+          .image(0, 0, "joystick")
+          .setDisplaySize(40, 40)
+          .setDepth(100)
+          .setAlpha(0.5),
+      });
+
+      // knife btn
+      const button = this.add.sprite(10, 10, "knife-icon").setInteractive();
+      button.setDisplaySize(24, 24); // set dimensions
+      button.setOrigin(1, 1); // set origin to bottom right corner
+      button.setDepth(100); // set maximum depth
+      button.setPosition(
+        this.sys.game.canvas.width - 20,
+        this.sys.game.canvas.height - 20
+      );
+      // Set button to be fixed on the screen
+      button.setScrollFactor(0);
+
+      button.on("pointerdown", () => {
+        this.touchdown = true;
+
+        setTimeout( () => {
+          this.touchdown = false;
+        }, 200 );
+      });
+    }
     // музыка на задний фон || ТОЛЬКО ДЛЯ ПРОДА))
     if (import.meta.env.PROD) {
       const soundBack = this.sound.add("back");
@@ -117,7 +160,11 @@ export default class Game extends Phaser.Scene {
 
     const skelsLayer = map.getObjectLayer("Skelets");
     skelsLayer.objects.forEach((skelObj) => {
-      this.skels.get(skelObj.x! + skelObj.width! * 0.5, skelObj.y! + skelObj.height! * 0.5, "skel");
+      this.skels.get(
+        skelObj.x! + skelObj.width! * 0.5,
+        skelObj.y! + skelObj.height! * 0.5,
+        "skel"
+      );
     });
 
     // столкновение (со стенами)
@@ -231,7 +278,12 @@ export default class Game extends Phaser.Scene {
 
   update(): void {
     if (this.fauna) {
-      this.fauna.update(this.cursors, this.addKeys);
+      this.fauna.update(
+        this.cursors,
+        this.addKeys,
+        this.movementJoyStick,
+        this.touchdown
+      );
     }
   }
 }
