@@ -17,3 +17,9 @@ export function isMobileDevice() {
     return navigator.userAgent.match(toMatchItem);
   });
 }
+
+const canvasElement = document.querySelector("canvas");
+export let hammerManager: HammerManager | null;
+if (canvasElement) {
+  hammerManager = new Hammer.Manager(canvasElement);
+}
