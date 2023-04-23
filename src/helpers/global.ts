@@ -1,3 +1,5 @@
+import "hammerjs";
+
 export function randomFormArray(array: Array<string>) {
   return array[Math.floor(Math.random() * array.length)];
 }
@@ -18,8 +20,10 @@ export function isMobileDevice() {
   });
 }
 
-const canvasElement = document.querySelector("canvas");
-export let hammerManager: HammerManager | null;
-if (canvasElement) {
-  hammerManager = new Hammer.Manager(canvasElement);
+export function instanceHM(): HammerManager | null {
+  const canvasElement = document.querySelector("canvas");
+  if (canvasElement) {
+    return new Hammer(canvasElement);
+  }
+  return null;
 }

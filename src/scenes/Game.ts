@@ -11,8 +11,7 @@ import { sceneEvents } from "../events/EventsCenter";
 import { createChestAnims } from "../anims/ChestAnims";
 import Chest from "../items/Chest";
 import VirtualJoyStickPlugin from "phaser3-rex-plugins/plugins/virtualjoystick-plugin";
-import { hammerManager, isMobileDevice } from "../helpers/global";
-
+import { instanceHM, isMobileDevice } from "../helpers/global";
 export default class Game extends Phaser.Scene {
   private movementJoyStick!: any;
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
@@ -66,12 +65,13 @@ export default class Game extends Phaser.Scene {
           .setAlpha(0.5),
       });
 
-      hammerManager?.on("tap", (ev) => {
-        console.log(ev.type);
+      const hammerManager = instanceHM();
+
+      hammerManager?.on("tap", () => {
         this.touchdown = true;
         setTimeout(() => {
           this.touchdown = false;
-        }, 200);
+        }, 10);
       });
 
       // mc.on("doubletap", (ev) => {

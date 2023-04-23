@@ -1,5 +1,4 @@
 import "./style.scss";
-import 'hammerjs';
 import Phaser from 'phaser';
 import Game from "./scenes/Game";
 import Preloader from "./scenes/Preloader";
