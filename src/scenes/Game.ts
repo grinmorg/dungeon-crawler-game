@@ -11,7 +11,7 @@ import { sceneEvents } from "../events/EventsCenter";
 import { createChestAnims } from "../anims/ChestAnims";
 import Chest from "../items/Chest";
 import VirtualJoyStickPlugin from "phaser3-rex-plugins/plugins/virtualjoystick-plugin";
-import { instanceHM, isMobileDevice } from "../helpers/global";
+import { isMobileDevice } from "../helpers/global";
 
 
 export default class Game extends Phaser.Scene {
@@ -22,7 +22,6 @@ export default class Game extends Phaser.Scene {
   private knives!: Phaser.Physics.Arcade.Group;
   private skels!: Phaser.Physics.Arcade.Group;
   private playerSkelsCollider?: Phaser.Physics.Arcade.Collider;
-  private touchdown: boolean = false; //click on mobile
 
   constructor() {
     super("game");

@@ -33,6 +33,7 @@ export default class Preloader extends Phaser.Scene {
     this.load.image("ui-heart-full", "ui/ui_heart_full.png");
     this.load.image("joystick", "ui/joystick.png");
     this.load.image("knife-icon", "ui/arrow-archery.svg");
+    this.load.image("controlls", "ui/controlls.png");
 
     // particles
     this.load.image("smoke", "particles/white-smoke.png");
