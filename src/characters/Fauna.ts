@@ -167,7 +167,7 @@ export default class Fauna extends Phaser.Physics.Arcade.Sprite {
     }
   }
 
-  update(cursors: Phaser.Types.Input.Keyboard.CursorKeys, addKeys: IAddKeys, movementJoyStick: any, touchdown: boolean) {
+  update(cursors: Phaser.Types.Input.Keyboard.CursorKeys, addKeys: IAddKeys, movementJoyStick: any) {
     // if dead - not inputs
     if (
       this.healthState === HealthState.DAMAGE ||
@@ -180,8 +180,9 @@ export default class Fauna extends Phaser.Physics.Arcade.Sprite {
       return;
     }
 
+    const extraMoveMobile = movementJoyStick?.force * 2 >= movementJoyStick?.radius;
 
-    if (Phaser.Input.Keyboard.JustDown(cursors.space!) || touchdown) {
+    if (Phaser.Input.Keyboard.JustDown(cursors.space!) || extraMoveMobile) {
       if (this.activeChest) {
         const coins = this.activeChest.open();
         console.log(coins);

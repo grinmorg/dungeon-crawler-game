@@ -12,6 +12,8 @@ import { createChestAnims } from "../anims/ChestAnims";
 import Chest from "../items/Chest";
 import VirtualJoyStickPlugin from "phaser3-rex-plugins/plugins/virtualjoystick-plugin";
 import { instanceHM, isMobileDevice } from "../helpers/global";
+
+
 export default class Game extends Phaser.Scene {
   private movementJoyStick!: any;
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
@@ -65,43 +67,13 @@ export default class Game extends Phaser.Scene {
           .setAlpha(0.5),
       });
 
-      const hammerManager = instanceHM();
+      // const hammerManager = instanceHM();
 
-      hammerManager?.on("tap", () => {
-        this.touchdown = true;
-        setTimeout(() => {
-          this.touchdown = false;
-        }, 10);
-      });
-
-      // mc.on("doubletap", (ev) => {
-      //   console.log(ev.type);
-
+      // hammerManager?.on("tap", () => {
       //   this.touchdown = true;
-
       //   setTimeout(() => {
       //     this.touchdown = false;
-      //   }, 200);
-      // });
-
-      // knife btn
-      // const button = this.add.sprite(10, 10, "knife-icon").setInteractive();
-      // button.setDisplaySize(24, 24); // set dimensions
-      // button.setOrigin(1, 1); // set origin to bottom right corner
-      // button.setDepth(100); // set maximum depth
-      // button.setPosition(
-      //   this.sys.game.canvas.width - 20,
-      //   this.sys.game.canvas.height - 20
-      // );
-      // // Set button to be fixed on the screen
-      // button.setScrollFactor(0);
-
-      // button.on("pointerdown", () => {
-      //   this.touchdown = true;
-
-      //   setTimeout( () => {
-      //     this.touchdown = false;
-      //   }, 200 );
+      //   }, 10);
       // });
     }
     // музыка на задний фон || ТОЛЬКО ДЛЯ ПРОДА))
@@ -299,8 +271,7 @@ export default class Game extends Phaser.Scene {
       this.fauna.update(
         this.cursors,
         this.addKeys,
-        this.movementJoyStick,
-        this.touchdown
+        this.movementJoyStick
       );
     }
   }

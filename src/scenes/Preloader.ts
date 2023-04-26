@@ -7,6 +7,7 @@ export default class Preloader extends Phaser.Scene {
   }
 
   preload() {
+    // maps
     this.load.image("tiles", "tiles/dungeon_tiles_extrud.png");
     this.load.tilemapTiledJSON("dungeon", "tiles/dungeon-01.json");
 
@@ -30,8 +31,8 @@ export default class Preloader extends Phaser.Scene {
     this.load.image("ui-heart-empty", "ui/ui_heart_empty.png");
     this.load.image("ui-heart-half", "ui/ui_heart_half.png");
     this.load.image("ui-heart-full", "ui/ui_heart_full.png");
-    this.load.image('joystick', 'ui/joystick.png');
-    this.load.image('knife-icon', 'ui/arrow-archery.svg');
+    this.load.image("joystick", "ui/joystick.png");
+    this.load.image("knife-icon", "ui/arrow-archery.svg");
 
     // particles
     this.load.image("smoke", "particles/white-smoke.png");
@@ -44,14 +45,27 @@ export default class Preloader extends Phaser.Scene {
     this.load.audio("pow", "audio/pow.mp3");
     this.load.audio("collect-coins", "audio/collect-coins.mp3");
 
+    // bg
+    this.load.image("bg-title", "bg/title.png");
+
     // joystick
     this.load.plugin("rexvirtualjoystickplugin", VirtualJoystickPlugin, true);
+
+    // preloader
+    const screenCenterX =
+      this.cameras.main.worldView.x + this.cameras.main.width / 2;
+    const screenCenterY =
+      this.cameras.main.worldView.y + this.cameras.main.height / 2;
+    const preloaderText = this.add
+      .text(screenCenterX, screenCenterY, "Loading: 0%")
+      .setOrigin(0.5);
+    this.load.on("progress", (percent: number) => {
+      preloaderText.setText(`Loading: ${Math.round(percent * 100)}%`);
+    });
   }
 
   create() {
     // запуск сцены game
-    this.scene.start("game");
-
-    
+    this.scene.start("title");
   }
 }
