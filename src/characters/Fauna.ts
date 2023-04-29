@@ -185,7 +185,6 @@ export default class Fauna extends Phaser.Physics.Arcade.Sprite {
     if (Phaser.Input.Keyboard.JustDown(cursors.space!) || extraMoveMobile) {
       if (this.activeChest) {
         const coins = this.activeChest.open();
-        console.log(coins);
 
         this._coins += coins;
 

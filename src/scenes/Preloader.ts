@@ -1,5 +1,6 @@
 import Phaser from "phaser";
 import VirtualJoystickPlugin from "phaser3-rex-plugins/plugins/virtualjoystick-plugin.js";
+import { maps } from "../consts/maps";
 
 export default class Preloader extends Phaser.Scene {
   constructor() {
@@ -9,7 +10,10 @@ export default class Preloader extends Phaser.Scene {
   preload() {
     // maps
     this.load.image("tiles", "tiles/dungeon_tiles_extrud.png");
-    this.load.tilemapTiledJSON("dungeon", "tiles/dungeon-01.json");
+
+    maps.forEach((mapName) => {
+      this.load.tilemapTiledJSON(mapName, `tiles/${mapName}.json`);
+    });
 
     // characters
     this.load.atlas(
@@ -67,6 +71,6 @@ export default class Preloader extends Phaser.Scene {
 
   create() {
     // запуск сцены game
-    this.scene.start("title");
+    this.scene.start("game");
   }
 }

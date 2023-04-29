@@ -12,11 +12,13 @@ import { createChestAnims } from "../anims/ChestAnims";
 import Chest from "../items/Chest";
 import VirtualJoyStickPlugin from "phaser3-rex-plugins/plugins/virtualjoystick-plugin";
 import { isMobileDevice } from "../helpers/global";
-
+import { maps } from "../consts/maps";
 
 export default class Game extends Phaser.Scene {
   private movementJoyStick!: any;
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
+  private mapsList: Phaser.Tilemaps.Tilemap[] = [];
+  private currentMap: number;
   private fauna!: Fauna;
   private addKeys!: IAddKeys;
   private knives!: Phaser.Physics.Arcade.Group;
@@ -26,6 +28,7 @@ export default class Game extends Phaser.Scene {
   constructor() {
     super("game");
 
+    this.currentMap = 0;
     this.addKeys = {} as IAddKeys;
   }
 
@@ -90,24 +93,71 @@ export default class Game extends Phaser.Scene {
     createCharacterAnims(this.anims);
     createSkelAnims(this.anims);
     createChestAnims(this.anims);
-    // this.add.image(0,0,'tiles');
 
-    // создаю сцену из tilemap json
-    const map = this.make.tilemap({ key: "dungeon" });
+    // загружаю все карты
+    maps.forEach((mapName) => {
+      const map = this.make.tilemap({ key: mapName });
+
+      this.mapsList.push(map);
+    });
+
+    this.startMap(0);
+
+    // Слушаю изменение карты
+    sceneEvents.on("changed-map", (map: number) => {
+      console.log("Меняю карту на: ", map);
+
+      // удаляю всё со сцены
+      this.scene.get("game").children.removeAll();
+
+      // Меняю номер текущей карты
+      this.currentMap = map;
+
+      // запускаю текущую карту
+      this.startMap(map);
+    });
+
+    // setTimeout(() => {
+    //   sceneEvents.emit("changed-map", 1);
+    // }, 3000);
+
+    // Удаление слушателей
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      sceneEvents.off("changed-map");
+    });
+  }
+
+  // Запуск карты
+  private startMap(mapIndex: number) {
+    const currentMap = this.mapsList[mapIndex];
+
+    if (!currentMap) {
+      console.error("Такой карты нет!");
+
+      return;
+    }
 
     // сопоставление тайлов с загруженным png (название тайлов берётся из редактора)
-    const tileset = map.addTilesetImage("dungeon", "tiles", 16, 16, 1, 2);
 
-    map.createLayer("Ground", tileset);
+    const tileset = currentMap.addTilesetImage(
+      "dungeon",
+      "tiles",
+      16,
+      16,
+      1,
+      2
+    );
 
-    const wallsLayer = map.createLayer("Walls", tileset);
-    const itemsLayer = map.createLayer("Items", tileset); // огонь на стенах, колонны и тд
+    currentMap.createLayer("Ground", tileset);
+
+    const wallsLayer = currentMap.createLayer("Walls", tileset);
+    const itemsLayer = currentMap.createLayer("Items", tileset); // огонь на стенах, колонны и тд
 
     // сундуки
     const chests = this.physics.add.staticGroup({
       classType: Chest,
     });
-    const chestLayer = map.getObjectLayer("Chests");
+    const chestLayer = currentMap.getObjectLayer("Chests");
     chestLayer.objects.forEach((chestObj) => {
       chests.get(
         chestObj.x! + chestObj.width! * 0.5,
@@ -117,8 +167,13 @@ export default class Game extends Phaser.Scene {
     });
 
     // Добавляю стенам свойство
-    wallsLayer.setCollisionByProperty({ collides: true });
-    itemsLayer.setCollisionByProperty({ collides: true });
+    if (wallsLayer) {
+      wallsLayer.setCollisionByProperty({ collides: true });
+    }
+
+    if (itemsLayer) {
+      itemsLayer.setCollisionByProperty({ collides: true });
+    }
     // персонаж
     this.fauna = this.add.fauna(128, 128, "fauna");
 
@@ -134,8 +189,13 @@ export default class Game extends Phaser.Scene {
     this.fauna.setKnives(this.knives);
 
     if (import.meta.env.DEV) {
-      debugDraw(this, wallsLayer);
-      debugDraw(this, itemsLayer);
+      if (wallsLayer) {
+        debugDraw(this, wallsLayer);
+      }
+
+      if (itemsLayer) {
+        debugDraw(this, itemsLayer);
+      }
     }
 
     // camera
@@ -147,7 +207,7 @@ export default class Game extends Phaser.Scene {
       classType: Skel,
     });
 
-    const skelsLayer = map.getObjectLayer("Skelets");
+    const skelsLayer = currentMap.getObjectLayer("Skelets");
     skelsLayer.objects.forEach((skelObj) => {
       this.skels.get(
         skelObj.x! + skelObj.width! * 0.5,
@@ -157,26 +217,30 @@ export default class Game extends Phaser.Scene {
     });
 
     // столкновение (со стенами)
-    this.physics.add.collider(this.fauna, wallsLayer);
-    this.physics.add.collider(this.skels, wallsLayer);
-    this.physics.add.collider(
-      this.knives,
-      wallsLayer,
-      this.handleKnifeWallCollision,
-      undefined,
-      this
-    );
+    if (wallsLayer) {
+      this.physics.add.collider(this.fauna, wallsLayer);
+      this.physics.add.collider(this.skels, wallsLayer);
+      this.physics.add.collider(
+        this.knives,
+        wallsLayer,
+        this.handleKnifeWallCollision,
+        undefined,
+        this
+      );
+    }
 
     // столкновение (с предметами)
-    this.physics.add.collider(this.fauna, itemsLayer);
-    this.physics.add.collider(this.skels, itemsLayer);
-    this.physics.add.collider(
-      this.fauna,
-      chests,
-      this.handlePlayerChestCollision,
-      undefined,
-      this
-    );
+    if (itemsLayer) {
+      this.physics.add.collider(this.fauna, itemsLayer);
+      this.physics.add.collider(this.skels, itemsLayer);
+      this.physics.add.collider(
+        this.fauna,
+        chests,
+        this.handlePlayerChestCollision,
+        undefined,
+        this
+      );
+    }
 
     // столкновение игрока с мобами
     this.playerSkelsCollider = this.physics.add.collider(
@@ -267,11 +331,19 @@ export default class Game extends Phaser.Scene {
 
   update(): void {
     if (this.fauna) {
-      this.fauna.update(
-        this.cursors,
-        this.addKeys,
-        this.movementJoyStick
-      );
+      // TODO: Дописать потом нормальный функционал перехода по уровням
+      if (this.fauna.x < 55 && this.fauna.y < 65) {
+        if (Phaser.Input.Keyboard.JustDown(this.cursors.space!)) {
+          if (this.currentMap === 0) {
+            sceneEvents.emit("changed-map", 1);
+          } else {
+            // FIXME: Почему то при возвращение на 0 карту - ошибка
+            sceneEvents.emit("changed-map", 0);
+          }
+        }
+      }
+
+      this.fauna.update(this.cursors, this.addKeys, this.movementJoyStick);
     }
   }
 }
